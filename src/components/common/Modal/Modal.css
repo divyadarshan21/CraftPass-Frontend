@@ -1,0 +1,236 @@
+/* ========================================
+   CraftPass Modal
+======================================== */
+
+/* ----------------------------------------
+   Overlay
+---------------------------------------- */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: var(--space-6);
+
+    background-color: rgba(0, 0, 0, 0.5);
+
+    overflow-y: auto;
+
+    animation: modal-fade-in var(--transition-fast) ease-out;
+}
+
+/* ----------------------------------------
+   Modal Content
+---------------------------------------- */
+
+.modal__content {
+    width: 100%;
+    max-height: calc(100vh - var(--space-12));
+
+    display: flex;
+    flex-direction: column;
+
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-lg);
+
+    overflow: hidden;
+
+    animation: modal-slide-in var(--transition-fast) ease-out;
+}
+
+/* ----------------------------------------
+   Sizes
+---------------------------------------- */
+
+.modal__content--small {
+    max-width: 420px;
+}
+
+.modal__content--medium {
+    max-width: 560px;
+}
+
+.modal__content--large {
+    max-width: 760px;
+}
+
+/* ----------------------------------------
+   Header
+---------------------------------------- */
+
+.modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+
+    padding: var(--space-5) var(--space-6);
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal__title {
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+}
+
+/* ----------------------------------------
+   Close Button
+---------------------------------------- */
+
+.modal__close {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+
+    border-radius: var(--radius-md);
+
+    background-color: transparent;
+    color: var(--color-text-secondary);
+
+    transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.modal__close:hover {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text);
+}
+
+.modal__close:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.modal__close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ----------------------------------------
+   Body
+---------------------------------------- */
+
+.modal__body {
+    flex: 1;
+
+    padding: var(--space-6);
+
+    color: var(--color-text-secondary);
+
+    overflow-y: auto;
+}
+
+/* ----------------------------------------
+   Footer
+---------------------------------------- */
+
+.modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+
+    padding: var(--space-4) var(--space-6);
+
+    border-top: 1px solid var(--color-border);
+}
+
+/* ----------------------------------------
+   Animations
+---------------------------------------- */
+
+@keyframes modal-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modal-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ----------------------------------------
+   Reduced Motion
+---------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .modal,
+    .modal__content {
+        animation: none;
+    }
+}
+
+/* ----------------------------------------
+   Mobile
+---------------------------------------- */
+
+@media (max-width: 768px) {
+    .modal {
+        align-items: flex-end;
+        padding: var(--space-3);
+    }
+
+    .modal__content {
+        max-height: calc(100vh - var(--space-6));
+
+        border-radius: var(--radius-lg);
+    }
+
+    .modal__content--small,
+    .modal__content--medium,
+    .modal__content--large {
+        max-width: 100%;
+    }
+
+    .modal__header {
+        padding: var(--space-4);
+    }
+
+    .modal__body {
+        padding: var(--space-4);
+    }
+
+    .modal__footer {
+        padding: var(--space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .modal__footer {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+}

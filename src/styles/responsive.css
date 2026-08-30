@@ -1,0 +1,135 @@
+/* ========================================
+   CraftPass Responsive Styles
+======================================== */
+
+/* ----------------------------------------
+   Container
+---------------------------------------- */
+
+.container {
+    width: 100%;
+    max-width: var(--container-xl);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+}
+
+/* ----------------------------------------
+   Page Content
+---------------------------------------- */
+
+.page-content {
+    width: 100%;
+    min-width: 0;
+}
+
+/* ----------------------------------------
+   Responsive Grid
+---------------------------------------- */
+
+.responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+}
+
+/* ----------------------------------------
+   Tablet
+---------------------------------------- */
+
+@media (max-width: 1024px) {
+    .container {
+        padding-inline: var(--space-5);
+    }
+
+    .responsive-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-5);
+    }
+}
+
+/* ----------------------------------------
+   Mobile
+---------------------------------------- */
+
+@media (max-width: 768px) {
+    .container {
+        padding-inline: var(--space-4);
+    }
+
+    .responsive-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+}
+
+/* ----------------------------------------
+   Small Mobile
+---------------------------------------- */
+
+@media (max-width: 480px) {
+    .container {
+        padding-inline: var(--space-3);
+    }
+}
+
+/* ----------------------------------------
+   Responsive Flex Utilities
+---------------------------------------- */
+
+.responsive-flex {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+    .responsive-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* ----------------------------------------
+   Responsive Visibility
+---------------------------------------- */
+
+.desktop-only {
+    display: block;
+}
+
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none;
+    }
+
+    .mobile-only {
+        display: block;
+    }
+}
+
+/* ----------------------------------------
+   Responsive Spacing
+---------------------------------------- */
+
+.section-spacing {
+    margin-block: var(--space-10);
+}
+
+@media (max-width: 768px) {
+    .section-spacing {
+        margin-block: var(--space-8);
+    }
+}
+
+/* ----------------------------------------
+   Prevent Horizontal Overflow
+---------------------------------------- */
+
+.page-content,
+.container {
+    overflow-x: hidden;
+}

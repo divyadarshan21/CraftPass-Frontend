@@ -1,0 +1,206 @@
+/* ========================================
+   CraftPass Button
+======================================== */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+
+    font-family: var(--font-family-sans);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    white-space: nowrap;
+
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+
+    user-select: none;
+}
+
+/* ----------------------------------------
+   Sizes
+---------------------------------------- */
+
+.button--small {
+    min-height: 36px;
+    padding: 0 var(--space-3);
+
+    font-size: var(--font-size-sm);
+}
+
+.button--medium {
+    min-height: 44px;
+    padding: 0 var(--space-5);
+
+    font-size: var(--font-size-sm);
+}
+
+.button--large {
+    min-height: 52px;
+    padding: 0 var(--space-6);
+
+    font-size: var(--font-size-md);
+}
+
+/* ----------------------------------------
+   Primary
+---------------------------------------- */
+
+.button--primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
+}
+
+.button--primary:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+}
+
+.button--primary:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+/* ----------------------------------------
+   Secondary
+---------------------------------------- */
+
+.button--secondary {
+    background-color: var(--color-accent);
+    color: var(--color-text-inverse);
+}
+
+.button--secondary:hover:not(:disabled) {
+    background-color: var(--color-accent-dark);
+}
+
+.button--secondary:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+/* ----------------------------------------
+   Outline
+---------------------------------------- */
+
+.button--outline {
+    border-color: var(--color-primary);
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+.button--outline:hover:not(:disabled) {
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
+}
+
+/* ----------------------------------------
+   Ghost
+---------------------------------------- */
+
+.button--ghost {
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+.button--ghost:hover:not(:disabled) {
+    background-color: var(--color-surface-muted);
+}
+
+/* ----------------------------------------
+   Danger
+---------------------------------------- */
+
+.button--danger {
+    background-color: var(--color-danger);
+    color: var(--color-text-inverse);
+}
+
+.button--danger:hover:not(:disabled) {
+    background-color: #aa3d31;
+}
+
+.button--danger:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+/* ----------------------------------------
+   Focus
+---------------------------------------- */
+
+.button:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ----------------------------------------
+   Disabled
+---------------------------------------- */
+
+.button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ----------------------------------------
+   Loading
+---------------------------------------- */
+
+.button--loading {
+    cursor: wait;
+}
+
+.button__content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.button__spinner {
+    width: 16px;
+    height: 16px;
+
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+
+    border-radius: var(--radius-full);
+
+    animation: button-spin 0.7s linear infinite;
+}
+
+@keyframes button-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ----------------------------------------
+   Full Width
+---------------------------------------- */
+
+.button--full-width {
+    width: 100%;
+}
+
+/* ----------------------------------------
+   Reduced Motion
+---------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        transition: none;
+    }
+
+    .button__spinner {
+        animation: none;
+    }
+}

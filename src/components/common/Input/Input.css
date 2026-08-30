@@ -1,0 +1,127 @@
+/* ========================================
+   CraftPass Input
+======================================== */
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* ----------------------------------------
+   Label
+---------------------------------------- */
+
+.input-field__label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    margin-bottom: var(--space-2);
+
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+}
+
+.input-field__required {
+    color: var(--color-danger);
+}
+
+/* ----------------------------------------
+   Input
+---------------------------------------- */
+
+.input {
+    width: 100%;
+    min-height: 44px;
+
+    padding: var(--space-3) var(--space-4);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    background-color: var(--color-surface);
+    color: var(--color-text);
+
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast);
+}
+
+.input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.input:hover:not(:disabled):not(:focus) {
+    border-color: var(--color-border-dark);
+}
+
+.input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+
+    box-shadow: 0 0 0 3px rgba(20, 83, 95, 0.12);
+}
+
+/* ----------------------------------------
+   Error
+---------------------------------------- */
+
+.input--error {
+    border-color: var(--color-danger);
+}
+
+.input--error:focus {
+    border-color: var(--color-danger);
+
+    box-shadow: 0 0 0 3px rgba(201, 75, 60, 0.12);
+}
+
+/* ----------------------------------------
+   Disabled
+---------------------------------------- */
+
+.input:disabled {
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
+
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.input:read-only {
+    background-color: var(--color-surface-muted);
+}
+
+/* ----------------------------------------
+   Supporting Message
+---------------------------------------- */
+
+.input-field__message {
+    margin-top: var(--space-2);
+
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+}
+
+.input-field__message--error {
+    color: var(--color-danger);
+}
+
+/* ----------------------------------------
+   Responsive
+---------------------------------------- */
+
+@media (max-width: 480px) {
+    .input {
+        min-height: 42px;
+        padding: var(--space-3);
+    }
+}

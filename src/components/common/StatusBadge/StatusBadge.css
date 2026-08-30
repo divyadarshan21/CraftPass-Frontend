@@ -1,0 +1,101 @@
+/* ========================================
+   CraftPass Status Badge
+======================================== */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    width: fit-content;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* ----------------------------------------
+   Sizes
+---------------------------------------- */
+
+.status-badge--small {
+    min-height: 24px;
+    padding: var(--space-1) var(--space-2);
+
+    font-size: var(--font-size-xs);
+}
+
+.status-badge--medium {
+    min-height: 30px;
+    padding: var(--space-2) var(--space-3);
+
+    font-size: var(--font-size-sm);
+}
+
+/* ----------------------------------------
+   Icon
+---------------------------------------- */
+
+.status-badge__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 0.85em;
+    font-weight: var(--font-weight-bold);
+}
+
+/* ----------------------------------------
+   Verified
+---------------------------------------- */
+
+.status-badge--verified {
+    border-color: var(--color-success);
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+}
+
+/* ----------------------------------------
+   Pending
+---------------------------------------- */
+
+.status-badge--pending {
+    border-color: var(--color-warning);
+    background-color: var(--color-warning-light);
+    color: var(--color-warning);
+}
+
+/* ----------------------------------------
+   Rejected
+---------------------------------------- */
+
+.status-badge--rejected {
+    border-color: var(--color-danger);
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+}
+
+/* ----------------------------------------
+   Label
+---------------------------------------- */
+
+.status-badge__label {
+    display: inline-block;
+}
+
+/* ----------------------------------------
+   Responsive
+---------------------------------------- */
+
+@media (max-width: 480px) {
+    .status-badge--medium {
+        min-height: 28px;
+        padding: var(--space-2);
+
+        font-size: var(--font-size-xs);
+    }
+}

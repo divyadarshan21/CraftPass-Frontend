@@ -1,0 +1,111 @@
+/* ========================================
+   CraftPass Error Message
+======================================== */
+
+.error-message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+
+    width: 100%;
+
+    padding: var(--space-4);
+
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius-md);
+
+    background-color: var(--color-danger-light);
+}
+
+/* ----------------------------------------
+   Icon
+---------------------------------------- */
+
+.error-message__icon {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    border-radius: var(--radius-full);
+
+    background-color: var(--color-danger);
+    color: var(--color-text-inverse);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+/* ----------------------------------------
+   Content
+---------------------------------------- */
+
+.error-message__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.error-message__title {
+    margin: 0;
+
+    color: var(--color-danger);
+
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+}
+
+.error-message__text {
+    margin-top: var(--space-1);
+
+    color: var(--color-text-secondary);
+
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+}
+
+/* ----------------------------------------
+   Retry Button
+---------------------------------------- */
+
+.error-message__retry {
+    margin-top: var(--space-3);
+
+    padding: 0;
+
+    background: transparent;
+    color: var(--color-danger);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    cursor: pointer;
+
+    transition: color var(--transition-fast);
+}
+
+.error-message__retry:hover {
+    color: var(--color-primary-dark);
+}
+
+.error-message__retry:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+}
+
+/* ----------------------------------------
+   Mobile
+---------------------------------------- */
+
+@media (max-width: 480px) {
+    .error-message {
+        padding: var(--space-3);
+    }
+}

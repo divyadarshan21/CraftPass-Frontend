@@ -1,103 +1,151 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { VerifierLayout } from '../../../components/layout/VerifierLayout/VerifierLayout';
-import { StatusBadge } from '../../../components/common/StatusBadge/StatusBadge';
-import { Button } from '../../../components/common/Button/Button';
-import { useAuth } from '../../../hooks/useAuth';
-import './Dashboard.css';
+import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { PageHeader } from '../../../components/layout/PageHeader/PageHeader'
+import { StatCard } from '../../../components/common/StatCard/StatCard'
+import { VerificationQueue } from '../../../components/verification/VerificationQueue/VerificationQueue'
+import { Loader } from '../../../components/common/Loader/Loader'
+import { EmptyState } from '../../../components/common/EmptyState/EmptyState'
+import { verificationApi } from '../../../services/verificationApi'
+import './Dashboard.css'
 
 export const Dashboard = () => {
-  const { user } = useAuth();
   const [stats, setStats] = useState({
     pending: 0,
+    inReview: 0,
     verified: 0,
     rejected: 0,
     total: 0,
-  });
-  const [recentReviews, setRecentReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
+  })
+  const [queue, setQueue] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const response = await verificationApi.getQueue()
+      const items = response.data || []
+      setQueue(items)
+
       setStats({
-        pending: 8,
-        verified: 42,
-        rejected: 5,
-        total: 55,
-      });
-      setRecentReviews([
-        { id: 1, product: 'Handwoven Silk Saree', status: 'pending', date: '2 mins ago' },
-        { id: 2, product: 'Dhokra Art Sculpture', status: 'verified', date: '15 mins ago' },
-        { id: 3, product: 'Terracotta Pottery Set', status: 'pending', date: '1 hour ago' },
-      ]);
-      setLoading(false);
-    }, 500);
-  }, []);
+        pending: items.filter(p => p.status === 'pending').length,
+        inReview: items.filter(p => p.status === 'review').length,
+        verified: items.filter(p => p.status === 'verified').length,
+        rejected: items.filter(p => p.status === 'rejected').length,
+        total: items.length,
+      })
+      setError(null)
+    } catch (err) {
+      console.error('Failed to fetch verification data:', err)
+      setError('Failed to load dashboard data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return <Loader fullPage message="Loading dashboard..." />
+  }
+
+  if (error) {
+    return (
+      <div className="verifier-dashboard-error">
+        <span className="verifier-dashboard-error-icon">⚠️</span>
+        <h3>Failed to Load Dashboard</h3>
+        <p>{error}</p>
+        <button className="verifier-dashboard-retry" onClick={fetchData}>
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <VerifierLayout>
-      <div className="verifier-dashboard">
-        <div className="dashboard-header">
-          <div>
-            <h1 className="heading-2">Verifier Dashboard</h1>
-            <p className="text-muted">Welcome back, {user?.name}</p>
-          </div>
+    <div className="verifier-dashboard">
+      <PageHeader
+        title="Verifier Dashboard"
+        subtitle={`${stats.pending} products pending review`}
+        actions={
           <Link to="/verifier/queue">
-            <Button variant="accent">Review Queue ({stats.pending})</Button>
+            <button className="verifier-dashboard-review-btn">
+              📋 Review Queue ({stats.pending})
+            </button>
+          </Link>
+        }
+      />
+
+      <div className="verifier-dashboard-stats">
+        <StatCard
+          label="Pending Review"
+          value={stats.pending}
+          icon="⏳"
+          color="warning"
+        />
+        <StatCard
+          label="In Review"
+          value={stats.inReview}
+          icon="🔍"
+          color="info"
+        />
+        <StatCard
+          label="Verified"
+          value={stats.verified}
+          icon="✅"
+          color="success"
+        />
+        <StatCard
+          label="Rejected"
+          value={stats.rejected}
+          icon="❌"
+          color="error"
+        />
+      </div>
+
+      <div className="verifier-dashboard-queue">
+        <div className="verifier-dashboard-queue-header">
+          <h3>Recent Queue Items</h3>
+          <Link to="/verifier/queue" className="view-all">
+            View All →
           </Link>
         </div>
+        {queue.length > 0 ? (
+          <VerificationQueue items={queue.slice(0, 5)} onSelect={(id) => {
+            window.location.href = `/verifier/submissions/${id}`
+          }} />
+        ) : (
+          <EmptyState
+            title="Queue is empty"
+            description="No products pending verification at this time."
+            icon="✅"
+            actionText="Refresh"
+            onAction={fetchData}
+          />
+        )}
+      </div>
 
-        <div className="dashboard-stats">
-          <div className="stat-card">
-            <div className="stat-icon">📋</div>
-            <div>
-              <div className="stat-value">{stats.pending}</div>
-              <div className="stat-label">Pending Review</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">✅</div>
-            <div>
-              <div className="stat-value">{stats.verified}</div>
-              <div className="stat-label">Verified</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">❌</div>
-            <div>
-              <div className="stat-value">{stats.rejected}</div>
-              <div className="stat-label">Rejected</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon">📦</div>
-            <div>
-              <div className="stat-value">{stats.total}</div>
-              <div className="stat-label">Total Reviewed</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="dashboard-recent">
-          <h3 className="heading-3">Recent Reviews</h3>
-          {loading ? (
-            <div className="loading-skeleton">Loading reviews...</div>
-          ) : (
-            <div className="recent-list">
-              {recentReviews.map((review) => (
-                <div key={review.id} className="recent-item">
-                  <div className="recent-info">
-                    <span className="recent-name">{review.product}</span>
-                    <StatusBadge status={review.status} size="small" />
-                  </div>
-                  <span className="recent-date">{review.date}</span>
-                </div>
-              ))}
-            </div>
-          )}
+      <div className="verifier-dashboard-quick-actions">
+        <div className="verifier-dashboard-quick-actions-grid">
+          <Link to="/verifier/queue" className="quick-action-card">
+            <span className="quick-action-icon">📋</span>
+            <h4>Review Queue</h4>
+            <p>Review pending products</p>
+          </Link>
+          <Link to="/verifier/history" className="quick-action-card">
+            <span className="quick-action-icon">📜</span>
+            <h4>History</h4>
+            <p>View review history</p>
+          </Link>
+          <Link to="/verifier/statistics" className="quick-action-card">
+            <span className="quick-action-icon">📊</span>
+            <h4>Statistics</h4>
+            <p>View verification stats</p>
+          </Link>
         </div>
       </div>
-    </VerifierLayout>
-  );
-};
+    </div>
+  )
+}

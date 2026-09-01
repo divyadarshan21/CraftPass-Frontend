@@ -1,93 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import { VerifierLayout } from '../../../components/layout/VerifierLayout/VerifierLayout';
-import { StatusBadge } from '../../../components/common/StatusBadge/StatusBadge';
-import { Loader } from '../../../components/common/Loader/Loader';
-import { EmptyState } from '../../../components/common/EmptyState/EmptyState';
-import { formatters } from '../../../utils/formatters';
-import './History.css';
+import React, { useState, useEffect } from 'react'
+import { PageHeader } from '../../../components/layout/PageHeader/PageHeader'
+import { VerificationHistory } from '../../../components/verification/VerificationHistory/VerificationHistory'
+import { Loader } from '../../../components/common/Loader/Loader'
+import { Button } from '../../../components/common/Button/Button'
+import { verificationApi } from '../../../services/verificationApi'
+import toast from 'react-hot-toast'
+import './History.css'
 
 export const History = () => {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    setTimeout(() => {
-      setHistory([
-        { 
-          id: 1, 
-          product: 'Handwoven Silk Saree', 
-          decision: 'verified',
-          date: new Date().toISOString(),
-          verifier: 'You',
-        },
-        { 
-          id: 2, 
-          product: 'Dhokra Art Sculpture', 
-          decision: 'verified',
-          date: new Date(Date.now() - 3600000).toISOString(),
-          verifier: 'You',
-        },
-        { 
-          id: 3, 
-          product: 'Terracotta Pottery Set', 
-          decision: 'rejected',
-          date: new Date(Date.now() - 7200000).toISOString(),
-          verifier: 'You',
-          feedback: 'Quality does not meet our standards',
-        },
-      ]);
-      setLoading(false);
-    }, 500);
-  }, []);
+    fetchHistory()
+  }, [])
+
+  const fetchHistory = async () => {
+    try {
+      setLoading(true)
+      const response = await verificationApi.getHistory()
+      setHistory(response.data || [])
+      setError(null)
+    } catch (err) {
+      console.error('Failed to fetch history:', err)
+      setError('Failed to load verification history')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await fetchHistory()
+    setRefreshing(false)
+    toast.success('History refreshed')
+  }
 
   if (loading) {
+    return <Loader fullPage message="Loading history..." />
+  }
+
+  if (error) {
     return (
-      <VerifierLayout>
-        <Loader size="large" text="Loading history..." />
-      </VerifierLayout>
-    );
+      <div className="verifier-history-error">
+        <span className="verifier-history-error-icon">⚠️</span>
+        <h3>Failed to Load History</h3>
+        <p>{error}</p>
+        <Button onClick={fetchHistory}>Retry</Button>
+      </div>
+    )
   }
 
   return (
-    <VerifierLayout>
-      <div className="history-page">
-        <div className="history-header">
-          <h1 className="heading-2">Review History</h1>
-          <p className="text-muted">{history.length} reviews completed</p>
-        </div>
+    <div className="verifier-history-page">
+      <PageHeader
+        title="Verification History"
+        subtitle={`${history.length} review${history.length !== 1 ? 's' : ''} completed`}
+        actions={
+          <Button variant="primary" onClick={handleRefresh} loading={refreshing}>
+            🔄 Refresh
+          </Button>
+        }
+      />
 
-        {history.length === 0 ? (
-          <EmptyState
-            title="No review history"
-            description="You haven't reviewed any products yet."
-            icon="📜"
-          />
-        ) : (
-          <div className="history-list">
-            {history.map((item) => (
-              <div key={item.id} className="history-item">
-                <div className="history-item-info">
-                  <div>
-                    <h4 className="history-item-name">{item.product}</h4>
-                    <div className="history-item-meta">
-                      <span>{formatters.timeAgo(item.date)}</span>
-                      <span>•</span>
-                      <span>by {item.verifier}</span>
-                    </div>
-                    {item.feedback && (
-                      <p className="history-item-feedback">Feedback: {item.feedback}</p>
-                    )}
-                  </div>
-                  <StatusBadge 
-                    status={item.decision === 'verified' ? 'verified' : 'rejected'} 
-                    size="small" 
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </VerifierLayout>
-  );
-};
+      <VerificationHistory
+        items={history}
+        onRefresh={handleRefresh}
+        itemsPerPage={10}
+      />
+    </div>
+  )
+}

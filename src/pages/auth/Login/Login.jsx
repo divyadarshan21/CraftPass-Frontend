@@ -1,103 +1,153 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
-import { useAuth } from '../../../hooks/useAuth';
-import { Input } from '../../../components/common/Input/Input';
-import { Button } from '../../../components/common/Button/Button';
-import './Login.css';
+import React, { useState } from 'react'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
+import { useAuth } from '../../../context/AuthContext'
+import { Input } from '../../../components/common/Input/Input'
+import { Button } from '../../../components/common/Button/Button'
+import { validateEmail, validateRequired } from '../../../utils/validators'
+import './Login.css'
 
 export const Login = () => {
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm();
+  const { login, isAuthenticated, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  })
+  const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(false)
 
-  const onSubmit = async (data) => {
-    setLoading(true);
-    try {
-      const user = await login(data.email, data.password);
-      toast.success(`Welcome back, ${user.name}!`);
-      
-      // Redirect based on role
-      if (user.role === 'artisan') navigate('/artisan/dashboard');
-      else if (user.role === 'verifier') navigate('/verifier/dashboard');
-      else navigate('/');
-    } catch (err) {
-      setError('root', { message: err.message });
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }))
     }
-  };
+  }
+
+  const validate = () => {
+    const newErrors = {}
+
+    if (!validateRequired(formData.email)) {
+      newErrors.email = 'Email is required'
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+    }
+
+    if (!validateRequired(formData.password)) {
+      newErrors.password = 'Password is required'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!validate()) return
+
+    setLoading(true)
+    const result = await login(formData.email, formData.password)
+    setLoading(false)
+
+    if (result.success) {
+      const user = result.user
+      if (user.role === 'artisan') {
+        navigate('/artisan/dashboard')
+      } else if (user.role === 'verifier') {
+        navigate('/verifier/dashboard')
+      } else {
+        navigate('/')
+      }
+    }
+  }
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <img src="/logo.png" alt="CraftPass" className="login-logo" />
-            <h1 className="heading-2">Welcome Back</h1>
-            <p className="text-muted">Sign in to manage your craft products</p>
+    <div className="auth-page">
+      <div className="auth-container">
+        <div className="auth-brand">
+          <img src="/logo.png" alt="CraftPass" className="auth-logo" />
+          <h1 className="auth-brand-title">CraftPass</h1>
+          <p className="auth-brand-subtitle">Authenticate. Trust. Prosper.</p>
+        </div>
+
+        <div className="auth-card">
+          <div className="auth-card-header">
+            <h2>Welcome Back</h2>
+            <p>Sign in to your CraftPass account</p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+          <form className="auth-form" onSubmit={handleSubmit}>
             <Input
-              label="Email Address"
               type="email"
+              name="email"
+              label="Email Address"
               placeholder="you@example.com"
-              error={errors.email?.message}
-              {...register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address',
-                },
-              })}
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+              required
+              icon={() => <span>✉️</span>}
             />
 
             <Input
-              label="Password"
               type="password"
-              placeholder="••••••••"
-              error={errors.password?.message}
-              {...register('password', {
-                required: 'Password is required',
-                minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
-                },
-              })}
+              name="password"
+              label="Password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              error={errors.password}
+              required
+              icon={() => <span>🔒</span>}
             />
 
-            {errors.root && (
-              <p className="login-error">{errors.root.message}</p>
-            )}
+            <div className="auth-form-options">
+              <label className="auth-remember">
+                <input type="checkbox" />
+                Remember me
+              </label>
+              <Link to="/forgot-password" className="auth-forgot">
+                Forgot password?
+              </Link>
+            </div>
 
             <Button
               type="submit"
               variant="primary"
-              size="large"
+              size="lg"
               fullWidth
               loading={loading}
             >
               Sign In
             </Button>
-
-            <p className="login-footer">
-              Don't have an account?{' '}
-              <Link to="/register" className="login-link">
-                Create one
-              </Link>
-            </p>
           </form>
+
+          <div className="auth-footer">
+            <p>
+              Don't have an account? <Link to="/register">Register</Link>
+            </p>
+          </div>
+        </div>
+
+        <div className="auth-features">
+          <div className="auth-feature">
+            <span className="auth-feature-icon">✅</span>
+            <span>Verified Products</span>
+          </div>
+          <div className="auth-feature">
+            <span className="auth-feature-icon">🔒</span>
+            <span>Secure Authentication</span>
+          </div>
+          <div className="auth-feature">
+            <span className="auth-feature-icon">🌍</span>
+            <span>Global Artisan Community</span>
+          </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

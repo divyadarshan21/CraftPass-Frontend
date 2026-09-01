@@ -1,51 +1,96 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authApi } from '../services/authApi';
-import { storage } from '../utils/storage';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { authApi } from '../services/authApi'
+import { storage } from '../utils/storage'
+import { USER_ROLES } from '../config/config'
+import toast from 'react-hot-toast'
 
-const AuthContext = createContext(null);
+const AuthContext = createContext()
+
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(storage.get('token'));
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [token, setToken] = useState(storage.get('craftpass_token'))
 
   useEffect(() => {
-    const initAuth = async () => {
-      if (token) {
-        try {
-          const userData = await authApi.getProfile();
-          setUser(userData);
-        } catch (error) {
-          storage.remove('token');
-          setToken(null);
-        }
-      }
-      setLoading(false);
-    };
-    initAuth();
-  }, [token]);
+    if (token) {
+      fetchUser()
+    } else {
+      setLoading(false)
+    }
+  }, [token])
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await authApi.getMe()
+      setUser(response.data)
+    } catch (error) {
+      console.error('Failed to fetch user:', error)
+      logout()
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   const login = async (email, password) => {
-    const { token, user } = await authApi.login(email, password);
-    storage.set('token', token);
-    setToken(token);
-    setUser(user);
-    return user;
-  };
+    try {
+      const response = await authApi.login(email, password)
+      const { token, user } = response.data
+      
+      storage.set('craftpass_token', token)
+      setToken(token)
+      setUser(user)
+      
+      toast.success(`Welcome back, ${user.name || user.email}!`)
+      return { success: true, user }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Login failed. Please try again.'
+      toast.error(message)
+      return { success: false, error: message }
+    }
+  }
 
   const register = async (userData) => {
-    const { token, user } = await authApi.register(userData);
-    storage.set('token', token);
-    setToken(token);
-    setUser(user);
-    return user;
-  };
+    try {
+      const response = await authApi.register(userData)
+      const { token, user } = response.data
+      
+      storage.set('craftpass_token', token)
+      setToken(token)
+      setUser(user)
+      
+      toast.success('Account created successfully!')
+      return { success: true, user }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Registration failed. Please try again.'
+      toast.error(message)
+      return { success: false, error: message }
+    }
+  }
 
-  const logout = () => {
-    storage.remove('token');
-    setToken(null);
-    setUser(null);
-  };
+  const logout = useCallback(() => {
+    storage.remove('craftpass_token')
+    setToken(null)
+    setUser(null)
+    toast.success('Logged out successfully')
+  }, [])
+
+  const updateUser = useCallback((updatedUser) => {
+    setUser(updatedUser)
+    storage.set('craftpass_user', updatedUser)
+  }, [])
+
+  const isAuthenticated = !!user
+  const isArtisan = user?.role === USER_ROLES.ARTISAN
+  const isVerifier = user?.role === USER_ROLES.VERIFIER
+  const isBuyer = user?.role === USER_ROLES.BUYER
 
   const value = {
     user,
@@ -54,23 +99,12 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!user,
-    isArtisan: user?.role === 'artisan',
-    isVerifier: user?.role === 'verifier',
-    isBuyer: user?.role === 'buyer',
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    updateUser,
+    isAuthenticated,
+    isArtisan,
+    isVerifier,
+    isBuyer,
   }
-  return context;
-};
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}

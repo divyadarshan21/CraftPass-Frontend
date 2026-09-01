@@ -1,0 +1,39 @@
+.auth-card-register {
+  padding: var(--spacing-8);
+}
+
+.auth-terms {
+  margin: var(--spacing-1) 0;
+}
+
+.auth-terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.auth-terms-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.auth-terms-checkbox a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.auth-terms-checkbox a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .auth-card-register {
+    padding: var(--spacing-4);
+  }
+}

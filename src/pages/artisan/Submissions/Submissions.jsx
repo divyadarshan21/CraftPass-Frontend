@@ -7,6 +7,7 @@ import { Loader } from '../../../components/common/Loader/Loader'
 import { EmptyState } from '../../../components/common/EmptyState/EmptyState'
 import { productApi } from '../../../services/productApi'
 import { formatDate, formatDateTime } from '../../../utils/formatters'
+import { PRODUCT_STATUS } from '../../../utils/constants'
 import toast from 'react-hot-toast'
 import './Submissions.css'
 
@@ -24,8 +25,15 @@ export const Submissions = () => {
   const fetchSubmissions = async () => {
     try {
       setLoading(true)
-      const response = await productApi.list({ status: 'submitted' })
-      setSubmissions(response.data || [])
+      const response = await productApi.list()
+      // Filter products that have been submitted or are in verification
+      const submitted = (response.data || []).filter(p => 
+        p.status === PRODUCT_STATUS.PENDING_VERIFICATION ||
+        p.status === PRODUCT_STATUS.VERIFIED ||
+        p.status === PRODUCT_STATUS.REJECTED ||
+        p.status === PRODUCT_STATUS.CORRECTION_REQUIRED
+      )
+      setSubmissions(submitted)
       setError(null)
     } catch (err) {
       console.error('Failed to fetch submissions:', err)
@@ -47,7 +55,7 @@ export const Submissions = () => {
 
   const handleResubmit = async (id) => {
     try {
-      await productApi.update(id, { status: 'pending' })
+      await productApi.submit(id)
       toast.success('Product resubmitted for verification')
       await fetchSubmissions()
     } catch (err) {
@@ -93,22 +101,28 @@ export const Submissions = () => {
           All ({getStatusCount('all')})
         </button>
         <button
-          className={`submissions-filter-btn ${filter === 'pending' ? 'active' : ''}`}
-          onClick={() => setFilter('pending')}
+          className={`submissions-filter-btn ${filter === 'PENDING_VERIFICATION' ? 'active' : ''}`}
+          onClick={() => setFilter('PENDING_VERIFICATION')}
         >
-          Pending ({getStatusCount('pending')})
+          Pending ({getStatusCount('PENDING_VERIFICATION')})
         </button>
         <button
-          className={`submissions-filter-btn ${filter === 'verified' ? 'active' : ''}`}
-          onClick={() => setFilter('verified')}
+          className={`submissions-filter-btn ${filter === 'VERIFIED' ? 'active' : ''}`}
+          onClick={() => setFilter('VERIFIED')}
         >
-          Verified ({getStatusCount('verified')})
+          Verified ({getStatusCount('VERIFIED')})
         </button>
         <button
-          className={`submissions-filter-btn ${filter === 'rejected' ? 'active' : ''}`}
-          onClick={() => setFilter('rejected')}
+          className={`submissions-filter-btn ${filter === 'REJECTED' ? 'active' : ''}`}
+          onClick={() => setFilter('REJECTED')}
         >
-          Rejected ({getStatusCount('rejected')})
+          Rejected ({getStatusCount('REJECTED')})
+        </button>
+        <button
+          className={`submissions-filter-btn ${filter === 'CORRECTION_REQUIRED' ? 'active' : ''}`}
+          onClick={() => setFilter('CORRECTION_REQUIRED')}
+        >
+          Correction Required ({getStatusCount('CORRECTION_REQUIRED')})
         </button>
       </div>
 
@@ -135,7 +149,7 @@ export const Submissions = () => {
                     </Link>
                     <div className="submission-item-meta">
                       <span className="submission-item-category">
-                        📂 {submission.category || 'Uncategorized'}
+                        🎨 {submission.craft || 'Uncategorized'}
                       </span>
                       {submission.submittedAt && (
                         <span className="submission-item-date">
@@ -151,7 +165,7 @@ export const Submissions = () => {
               </div>
 
               <div className="submission-item-body">
-                {submission.status === 'rejected' && submission.rejectionReason && (
+                {submission.status === 'REJECTED' && submission.rejectionReason && (
                   <div className="submission-item-rejection">
                     <span className="submission-item-rejection-label">Rejection Reason:</span>
                     <span className="submission-item-rejection-text">
@@ -159,11 +173,11 @@ export const Submissions = () => {
                     </span>
                   </div>
                 )}
-                {submission.feedback && (
-                  <div className="submission-item-feedback">
-                    <span className="submission-item-feedback-label">Feedback:</span>
-                    <span className="submission-item-feedback-text">
-                      {submission.feedback}
+                {submission.status === 'CORRECTION_REQUIRED' && submission.correctionRemarks && (
+                  <div className="submission-item-correction">
+                    <span className="submission-item-correction-label">Correction Required:</span>
+                    <span className="submission-item-correction-text">
+                      {submission.correctionRemarks}
                     </span>
                   </div>
                 )}
@@ -183,7 +197,7 @@ export const Submissions = () => {
                     View Details
                   </Button>
                 </Link>
-                {submission.status === 'rejected' && (
+                {submission.status === 'REJECTED' && (
                   <Button
                     variant="primary"
                     size="sm"
@@ -192,13 +206,22 @@ export const Submissions = () => {
                     Resubmit for Review
                   </Button>
                 )}
-                {submission.status === 'pending' && (
+                {submission.status === 'CORRECTION_REQUIRED' && (
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    onClick={() => handleResubmit(submission.id)}
+                  >
+                    Resubmit with Corrections
+                  </Button>
+                )}
+                {submission.status === 'PENDING_VERIFICATION' && (
                   <Button variant="ghost" size="sm" disabled>
                     Awaiting Review
                   </Button>
                 )}
-                {submission.status === 'verified' && (
-                  <Link to={`/passport/${submission.id}`}>
+                {submission.status === 'VERIFIED' && (
+                  <Link to={`/passport/${submission.passportSlug || submission.id}`}>
                     <Button variant="success" size="sm">
                       View Passport
                     </Button>

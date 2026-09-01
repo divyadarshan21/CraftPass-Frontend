@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { PageHeader } from '../../../components/layout/PageHeader/PageHeader'
 import { VerificationReview } from '../../../components/verification/VerificationReview/VerificationReview'
-import { VerificationDecision } from '../../../components/verification/VerificationDecision/VerificationDecision'
 import { Loader } from '../../../components/common/Loader/Loader'
 import { Button } from '../../../components/common/Button/Button'
 import { verificationApi } from '../../../services/verificationApi'
@@ -24,7 +23,7 @@ export const ReviewSubmission = () => {
   const fetchSubmission = async () => {
     try {
       setLoading(true)
-      const response = await verificationApi.getReview(id)
+      const response = await verificationApi.getProduct(id)
       setSubmission(response.data)
       setError(null)
     } catch (err) {
@@ -35,10 +34,10 @@ export const ReviewSubmission = () => {
     }
   }
 
-  const handleApprove = async (submissionId) => {
+  const handleApprove = async (submissionId, remarks) => {
     setProcessing(true)
     try {
-      await verificationApi.decide(submissionId, 'approve', '')
+      await verificationApi.approve(submissionId, remarks)
       toast.success('Product approved successfully!')
       navigate('/verifier/queue')
     } catch (err) {
@@ -49,10 +48,10 @@ export const ReviewSubmission = () => {
     }
   }
 
-  const handleReject = async (submissionId, reason) => {
+  const handleReject = async (submissionId, remarks) => {
     setProcessing(true)
     try {
-      await verificationApi.decide(submissionId, 'reject', reason)
+      await verificationApi.reject(submissionId, remarks)
       toast.success('Product rejected')
       navigate('/verifier/queue')
     } catch (err) {
@@ -63,14 +62,14 @@ export const ReviewSubmission = () => {
     }
   }
 
-  const handleRequestChanges = async (submissionId, feedback) => {
+  const handleRequestCorrection = async (submissionId, remarks) => {
     setProcessing(true)
     try {
-      await verificationApi.decide(submissionId, 'request_changes', feedback)
-      toast.success('Changes requested successfully')
+      await verificationApi.correction(submissionId, remarks)
+      toast.success('Correction requested successfully')
       navigate('/verifier/queue')
     } catch (err) {
-      const message = err.response?.data?.message || 'Failed to request changes'
+      const message = err.response?.data?.message || 'Failed to request correction'
       toast.error(message)
     } finally {
       setProcessing(false)
@@ -111,7 +110,7 @@ export const ReviewSubmission = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(`/passport/${submission.id}`, '_blank')}
+              onClick={() => window.open(`/passport/${submission.passportSlug || submission.id}`, '_blank')}
             >
               📋 View Passport
             </Button>
@@ -125,87 +124,9 @@ export const ReviewSubmission = () => {
             submission={submission}
             onApprove={handleApprove}
             onReject={handleReject}
-            onRequestChanges={handleRequestChanges}
+            onRequestCorrection={handleRequestCorrection}
             loading={processing}
           />
-        </div>
-
-        <div className="review-submission-sidebar">
-          <div className="review-submission-sidebar-card">
-            <h4>Review Progress</h4>
-            <div className="review-submission-progress">
-              <div className="review-submission-progress-step completed">
-                <span className="review-submission-progress-step-icon">✓</span>
-                <span className="review-submission-progress-step-label">Review Details</span>
-              </div>
-              <div className="review-submission-progress-step completed">
-                <span className="review-submission-progress-step-icon">✓</span>
-                <span className="review-submission-progress-step-label">Examine Evidence</span>
-              </div>
-              <div className="review-submission-progress-step active">
-                <span className="review-submission-progress-step-icon">●</span>
-                <span className="review-submission-progress-step-label">Make Decision</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="review-submission-sidebar-card">
-            <h4>Guidelines</h4>
-            <ul className="review-submission-guidelines">
-              <li>✅ Verify product authenticity</li>
-              <li>✅ Check evidence quality</li>
-              <li>✅ Review artisan information</li>
-              <li>✅ Ensure product meets standards</li>
-              <li>✅ Provide constructive feedback</li>
-            </ul>
-          </div>
-
-          <div className="review-submission-sidebar-card">
-            <h4>Quick Stats</h4>
-            <div className="review-submission-stats">
-              <div className="review-submission-stat">
-                <span className="review-submission-stat-label">Status</span>
-                <span className={`review-submission-stat-value status-${submission.status?.toLowerCase() || 'pending'}`}>
-                  {submission.status || 'Pending'}
-                </span>
-              </div>
-              <div className="review-submission-stat">
-                <span className="review-submission-stat-label">Submitted</span>
-                <span className="review-submission-stat-value">
-                  {submission.submittedAt ? new Date(submission.submittedAt).toLocaleDateString() : 'N/A'}
-                </span>
-              </div>
-              <div className="review-submission-stat">
-                <span className="review-submission-stat-label">Evidence</span>
-                <span className="review-submission-stat-value">
-                  {submission.evidence?.length || 0} items
-                </span>
-              </div>
-              <div className="review-submission-stat">
-                <span className="review-submission-stat-label">Reviews</span>
-                <span className="review-submission-stat-value">
-                  {submission.previousReviews?.length || 0}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="review-submission-sidebar-card review-submission-decision-card">
-            <h4>Decision</h4>
-            <VerificationDecision
-              submission={submission}
-              onDecide={(decision, feedback) => {
-                if (decision === 'approve') {
-                  handleApprove(submission.id)
-                } else if (decision === 'reject') {
-                  handleReject(submission.id, feedback)
-                } else if (decision === 'changes') {
-                  handleRequestChanges(submission.id, feedback)
-                }
-              }}
-              loading={processing}
-            />
-          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { authApi } from '../services/authApi'
 import { storage } from '../utils/storage'
-import { USER_ROLES } from '../config/config'
+import { ROLES } from '../utils/constants'
 import toast from 'react-hot-toast'
 
 const AuthContext = createContext()
@@ -17,7 +17,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [token, setToken] = useState(storage.get('craftpass_token'))
+  const [token, setToken] = useState(storage.getToken())
 
   useEffect(() => {
     if (token) {
@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data)
     } catch (error) {
       console.error('Failed to fetch user:', error)
-      logout()
+      storage.clearAppData()
+      setToken(null)
     } finally {
       setLoading(false)
     }
@@ -44,7 +45,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authApi.login(email, password)
       const { token, user } = response.data
       
-      storage.set('craftpass_token', token)
+      storage.setToken(token)
+      storage.setUser(user)
       setToken(token)
       setUser(user)
       
@@ -62,7 +64,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authApi.register(userData)
       const { token, user } = response.data
       
-      storage.set('craftpass_token', token)
+      storage.setToken(token)
+      storage.setUser(user)
       setToken(token)
       setUser(user)
       
@@ -76,7 +79,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = useCallback(() => {
-    storage.remove('craftpass_token')
+    storage.clearAppData()
     setToken(null)
     setUser(null)
     toast.success('Logged out successfully')
@@ -84,13 +87,8 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = useCallback((updatedUser) => {
     setUser(updatedUser)
-    storage.set('craftpass_user', updatedUser)
+    storage.setUser(updatedUser)
   }, [])
-
-  const isAuthenticated = !!user
-  const isArtisan = user?.role === USER_ROLES.ARTISAN
-  const isVerifier = user?.role === USER_ROLES.VERIFIER
-  const isBuyer = user?.role === USER_ROLES.BUYER
 
   const value = {
     user,
@@ -100,10 +98,10 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
-    isAuthenticated,
-    isArtisan,
-    isVerifier,
-    isBuyer,
+    isAuthenticated: !!user,
+    isArtisan: user?.role === ROLES.ARTISAN,
+    isVerifier: user?.role === ROLES.VERIFIER,
+    isBuyer: user?.role === ROLES.BUYER,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

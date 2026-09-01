@@ -1,0 +1,19 @@
+.buyer-layout {
+  min-height: 100vh;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+
+.buyer-layout-content {
+  flex: 1;
+  padding: 0;
+  min-height: calc(100vh - 64px);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .buyer-layout-content {
+    padding: 0;
+  }
+}

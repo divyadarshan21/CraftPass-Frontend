@@ -1,47 +1,60 @@
-export const ROLES = {
-  ARTISAN: 'artisan',
-  VERIFIER: 'verifier',
-  BUYER: 'buyer',
-};
-
+// ============================================
+// PRODUCT STATUS - Updated for Backend
+// ============================================
 export const PRODUCT_STATUS = {
-  DRAFT: 'draft',
-  PENDING: 'pending',
-  VERIFIED: 'verified',
-  REJECTED: 'rejected',
-  NEEDS_REVISION: 'needs_revision',
-};
+  DRAFT: 'DRAFT',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+  CORRECTION_REQUIRED: 'CORRECTION_REQUIRED',
+}
 
+export const PRODUCT_STATUS_LABELS = {
+  [PRODUCT_STATUS.DRAFT]: 'Draft',
+  [PRODUCT_STATUS.PENDING_VERIFICATION]: 'Pending Verification',
+  [PRODUCT_STATUS.VERIFIED]: 'Verified',
+  [PRODUCT_STATUS.REJECTED]: 'Rejected',
+  [PRODUCT_STATUS.CORRECTION_REQUIRED]: 'Correction Required',
+}
+
+export const PRODUCT_STATUS_COLORS = {
+  [PRODUCT_STATUS.DRAFT]: '#8A8277',
+  [PRODUCT_STATUS.PENDING_VERIFICATION]: '#D4A02B',
+  [PRODUCT_STATUS.VERIFIED]: '#2D8A4E',
+  [PRODUCT_STATUS.REJECTED]: '#C62828',
+  [PRODUCT_STATUS.CORRECTION_REQUIRED]: '#E65100',
+}
+
+export const PRODUCT_STATUS_ICONS = {
+  [PRODUCT_STATUS.DRAFT]: '📄',
+  [PRODUCT_STATUS.PENDING_VERIFICATION]: '⏳',
+  [PRODUCT_STATUS.VERIFIED]: '✅',
+  [PRODUCT_STATUS.REJECTED]: '❌',
+  [PRODUCT_STATUS.CORRECTION_REQUIRED]: '✏️',
+}
+
+// ============================================
+// EVIDENCE TYPES - Updated for Backend
+// ============================================
 export const EVIDENCE_TYPES = {
-  PHOTO: 'photo',
-  VIDEO: 'video',
-  DOCUMENT: 'document',
-  CERTIFICATE: 'certificate',
-};
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO',
+  DOCUMENT: 'DOCUMENT',
+  CERTIFICATE: 'CERTIFICATE',
+}
 
-export const CATEGORIES = [
-  'Textiles',
-  'Pottery',
-  'Woodwork',
-  'Metalwork',
-  'Jewelry',
-  'Painting',
-  'Sculpture',
-  'Other',
-];
+export const EVIDENCE_TYPE_LABELS = {
+  [EVIDENCE_TYPES.IMAGE]: 'Image',
+  [EVIDENCE_TYPES.VIDEO]: 'Video',
+  [EVIDENCE_TYPES.DOCUMENT]: 'Document',
+  [EVIDENCE_TYPES.CERTIFICATE]: 'Certificate',
+}
 
-export const ROUTES = {
-  LOGIN: '/login',
-  REGISTER: '/register',
-  ARTISAN_DASHBOARD: '/artisan/dashboard',
-  ARTISAN_PRODUCTS: '/artisan/products',
-  ARTISAN_ADD_PRODUCT: '/artisan/products/new',
-  ARTISAN_EVIDENCE: '/artisan/evidence',
-  ARTISAN_SUBMISSIONS: '/artisan/submissions',
-  VERIFIER_DASHBOARD: '/verifier/dashboard',
-  VERIFIER_QUEUE: '/verifier/queue',
-  VERIFIER_HISTORY: '/verifier/history',
-  HOME: '/',
-  SEARCH: '/search',
-  PASSPORT: '/passport/:slug',
-};
+// ============================================
+// ROLES - Updated for Backend
+// ============================================
+export const ROLES = {
+  ARTISAN: 'ARTISAN',
+  VERIFIER: 'VERIFIER',
+  BUYER: 'BUYER',
+}

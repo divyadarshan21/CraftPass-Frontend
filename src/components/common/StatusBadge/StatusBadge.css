@@ -1,101 +1,55 @@
-/* ========================================
-   CraftPass Status Badge
-======================================== */
-
 .status-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-
-    width: fit-content;
-
-    border: 1px solid transparent;
-    border-radius: var(--radius-full);
-
-    font-weight: var(--font-weight-medium);
-    line-height: 1;
-    white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
-/* ----------------------------------------
-   Sizes
----------------------------------------- */
-
-.status-badge--small {
-    min-height: 24px;
-    padding: var(--space-1) var(--space-2);
-
-    font-size: var(--font-size-xs);
+.status-badge-icon {
+  font-size: 1em;
 }
 
-.status-badge--medium {
-    min-height: 30px;
-    padding: var(--space-2) var(--space-3);
-
-    font-size: var(--font-size-sm);
+.status-badge.success {
+  background-color: var(--success-light);
+  color: var(--success);
 }
 
-/* ----------------------------------------
-   Icon
----------------------------------------- */
-
-.status-badge__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 0.85em;
-    font-weight: var(--font-weight-bold);
+.status-badge.warning {
+  background-color: var(--warning-light);
+  color: var(--warning);
 }
 
-/* ----------------------------------------
-   Verified
----------------------------------------- */
-
-.status-badge--verified {
-    border-color: var(--color-success);
-    background-color: var(--color-success-light);
-    color: var(--color-success);
+.status-badge.error {
+  background-color: var(--error-light);
+  color: var(--error);
 }
 
-/* ----------------------------------------
-   Pending
----------------------------------------- */
-
-.status-badge--pending {
-    border-color: var(--color-warning);
-    background-color: var(--color-warning-light);
-    color: var(--color-warning);
+.status-badge.correction {
+  background-color: #FFF3E0;
+  color: #E65100;
 }
 
-/* ----------------------------------------
-   Rejected
----------------------------------------- */
-
-.status-badge--rejected {
-    border-color: var(--color-danger);
-    background-color: var(--color-danger-light);
-    color: var(--color-danger);
+.status-badge.muted {
+  background-color: var(--gray-100);
+  color: var(--muted);
 }
 
-/* ----------------------------------------
-   Label
----------------------------------------- */
-
-.status-badge__label {
-    display: inline-block;
+.status-badge.sm {
+  padding: var(--spacing-0) var(--spacing-2);
+  font-size: var(--font-size-xs);
 }
 
-/* ----------------------------------------
-   Responsive
----------------------------------------- */
+.status-badge.md {
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
 
-@media (max-width: 480px) {
-    .status-badge--medium {
-        min-height: 28px;
-        padding: var(--space-2);
-
-        font-size: var(--font-size-xs);
-    }
+.status-badge.lg {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--font-size-base);
 }

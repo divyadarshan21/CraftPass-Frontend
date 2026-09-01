@@ -1,15 +1,17 @@
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { formatFileSize } from '../../../utils/formatters'
+import { EVIDENCE_TYPES, EVIDENCE_TYPE_LABELS } from '../../../utils/constants'
 import { Button } from '../../common/Button/Button'
 import './EvidenceUploader.css'
 
 export const EvidenceUploader = ({
   onUpload,
   onRemove,
-  accept = 'image/*,video/*,application/pdf',
+  productId,
+  accept = 'image/*,video/*,.pdf,.doc,.docx',
   maxFiles = 10,
-  maxSize = 20 * 1024 * 1024, // 20MB
+  maxSize = 20 * 1024 * 1024,
   label = 'Upload Evidence',
   existingFiles = [],
   loading = false,
@@ -17,6 +19,8 @@ export const EvidenceUploader = ({
   const [files, setFiles] = useState(existingFiles || [])
   const [error, setError] = useState('')
   const [uploadProgress, setUploadProgress] = useState({})
+  const [evidenceType, setEvidenceType] = useState(EVIDENCE_TYPES.IMAGE)
+  const [title, setTitle] = useState('')
 
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
     if (fileRejections.length > 0) {
@@ -30,7 +34,7 @@ export const EvidenceUploader = ({
 
     const totalFiles = files.length + acceptedFiles.length
     if (totalFiles > maxFiles) {
-      setError(`Maximum ${maxFiles} files allowed. You have ${files.length} already.`)
+      setError(`Maximum ${maxFiles} files allowed`)
       return
     }
 
@@ -55,18 +59,33 @@ export const EvidenceUploader = ({
     setFiles(prev => [...prev, ...newFiles])
     setError('')
 
-    if (onUpload) {
-      // Simulate upload progress
-      newFiles.forEach((newFile, index) => {
-        const fileIndex = files.length + index
-        simulateUpload(fileIndex, newFile, () => {
-          onUpload(newFile)
-        })
-      })
-    }
-  }, [files, maxFiles, maxSize, onUpload])
+    // Upload each file
+    newFiles.forEach((newFile, index) => {
+      const fileIndex = files.length + index
+      handleUploadFile(fileIndex, newFile)
+    })
+  }, [files, maxFiles, maxSize])
 
-  const simulateUpload = (index, file, callback) => {
+  const handleUploadFile = (index, fileData) => {
+    if (!productId) {
+      setError('Product ID is required')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', fileData.file)
+    formData.append('type', evidenceType)
+    formData.append('title', title || fileData.name)
+
+    setFiles(prev => {
+      const updated = [...prev]
+      if (updated[index]) {
+        updated[index] = { ...updated[index], status: 'uploading' }
+      }
+      return updated
+    })
+
+    // Simulate upload with progress
     let progress = 0
     const interval = setInterval(() => {
       progress += Math.random() * 15 + 5
@@ -80,7 +99,9 @@ export const EvidenceUploader = ({
           }
           return updated
         })
-        if (callback) callback()
+        if (onUpload) {
+          onUpload(fileData.file, evidenceType, title || fileData.name)
+        }
         return
       }
       setFiles(prev => {
@@ -120,8 +141,41 @@ export const EvidenceUploader = ({
            (file.name && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name))
   }
 
+  const evidenceTypeOptions = Object.entries(EVIDENCE_TYPES).map(([key, value]) => ({
+    value,
+    label: EVIDENCE_TYPE_LABELS[value],
+  }))
+
   return (
     <div className="evidence-uploader">
+      {/* Evidence Type Selector */}
+      <div className="evidence-uploader-type-selector">
+        <label className="evidence-uploader-type-label">Evidence Type</label>
+        <select
+          className="evidence-uploader-type-select"
+          value={evidenceType}
+          onChange={(e) => setEvidenceType(e.target.value)}
+        >
+          {evidenceTypeOptions.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Title Input */}
+      <div className="evidence-uploader-title-input">
+        <input
+          type="text"
+          placeholder="Enter evidence title..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="evidence-uploader-title-field"
+        />
+      </div>
+
+      {/* Dropzone */}
       <div
         {...getRootProps()}
         className={`evidence-uploader-dropzone ${isDragActive ? 'active' : ''} ${error ? 'error' : ''} ${files.length >= maxFiles ? 'full' : ''}`}
@@ -135,21 +189,12 @@ export const EvidenceUploader = ({
               ? `Maximum ${maxFiles} files reached` 
               : `Drag & drop or click to browse (${files.length}/${maxFiles})`}
           </span>
-          <span className="evidence-uploader-accept">
-            Accepted: {accept.split(',').join(', ')}
-          </span>
         </div>
       </div>
 
       {error && <p className="evidence-uploader-error">{error}</p>}
 
-      {loading && (
-        <div className="evidence-uploader-loading">
-          <div className="spinner" />
-          <span>Uploading files...</span>
-        </div>
-      )}
-
+      {/* File List */}
       {files.length > 0 && (
         <ul className="evidence-uploader-list">
           {files.map((file, index) => (
@@ -172,6 +217,9 @@ export const EvidenceUploader = ({
                 <span className="evidence-uploader-item-size">
                   {formatFileSize(file.size)}
                 </span>
+                <span className="evidence-uploader-item-type">
+                  {EVIDENCE_TYPE_LABELS[evidenceType] || evidenceType}
+                </span>
                 {file.status === 'pending' && (
                   <div className="evidence-uploader-item-progress">
                     <div 
@@ -179,6 +227,11 @@ export const EvidenceUploader = ({
                       style={{ width: `${file.progress || 0}%` }}
                     />
                   </div>
+                )}
+                {file.status === 'uploading' && (
+                  <span className="evidence-uploader-item-status uploading">
+                    Uploading... {file.progress || 0}%
+                  </span>
                 )}
                 {file.status === 'uploaded' && (
                   <span className="evidence-uploader-item-status success">✓ Uploaded</span>

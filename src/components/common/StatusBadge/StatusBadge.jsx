@@ -1,80 +1,41 @@
-import PropTypes from "prop-types";
-import "./StatusBadge.css";
+import React from 'react'
+import {
+  PRODUCT_STATUS,
+  PRODUCT_STATUS_LABELS,
+  PRODUCT_STATUS_COLORS,
+  PRODUCT_STATUS_ICONS,
+} from '../../../utils/constants'
+import './StatusBadge.css'
 
-const STATUS_CONFIG = {
-    verified: {
-        label: "Verified",
-        icon: "✓"
-    },
-    pending: {
-        label: "Pending",
-        icon: "•"
-    },
-    rejected: {
-        label: "Rejected",
-        icon: "!"
+export const StatusBadge = ({ status, size = 'md', className = '' }) => {
+  const statusKey = status?.toUpperCase() || 'DRAFT'
+  const label = PRODUCT_STATUS_LABELS[statusKey] || status
+  const color = PRODUCT_STATUS_COLORS[statusKey] || '#8A8277'
+  const icon = PRODUCT_STATUS_ICONS[statusKey] || '📄'
+
+  // Map status to CSS class
+  const getStatusClass = () => {
+    switch (statusKey) {
+      case 'VERIFIED':
+        return 'success'
+      case 'PENDING_VERIFICATION':
+        return 'warning'
+      case 'REJECTED':
+        return 'error'
+      case 'CORRECTION_REQUIRED':
+        return 'correction'
+      default:
+        return 'muted'
     }
-};
+  }
 
-function StatusBadge({
-    status,
-    label,
-    showIcon = true,
-    size = "medium",
-    className = ""
-}) {
-    const normalizedStatus = status.toLowerCase();
-
-    const config = STATUS_CONFIG[normalizedStatus];
-
-    if (!config) {
-        return null;
-    }
-
-    const badgeClasses = [
-        "status-badge",
-        `status-badge--${normalizedStatus}`,
-        `status-badge--${size}`,
-        className
-    ]
-        .filter(Boolean)
-        .join(" ");
-
-    return (
-        <span className={badgeClasses}>
-            {showIcon && (
-                <span
-                    className="status-badge__icon"
-                    aria-hidden="true"
-                >
-                    {config.icon}
-                </span>
-            )}
-
-            <span className="status-badge__label">
-                {label || config.label}
-            </span>
-        </span>
-    );
+  return (
+    <span 
+      className={`status-badge ${getStatusClass()} ${size} ${className}`}
+      style={{ '--status-color': color }}
+    >
+      <span className="status-badge-icon">{icon}</span>
+      {label}
+    </span>
+  )
 }
-
-StatusBadge.propTypes = {
-    status: PropTypes.oneOf([
-        "verified",
-        "pending",
-        "rejected"
-    ]).isRequired,
-
-    label: PropTypes.string,
-
-    showIcon: PropTypes.bool,
-
-    size: PropTypes.oneOf([
-        "small",
-        "medium"
-    ]),
-
-    className: PropTypes.string
-};
-
-export default StatusBadge;

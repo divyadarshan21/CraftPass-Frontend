@@ -9,14 +9,13 @@ export const VerificationReview = ({
   submission,
   onApprove,
   onReject,
-  onRequestChanges,
+  onRequestCorrection,
   loading = false,
   className = '',
 }) => {
   const [feedback, setFeedback] = useState('')
-  const [rejectionReason, setRejectionReason] = useState('')
   const [showRejectModal, setShowRejectModal] = useState(false)
-  const [showChangesModal, setShowChangesModal] = useState(false)
+  const [showCorrectionModal, setShowCorrectionModal] = useState(false)
 
   const {
     id,
@@ -24,45 +23,45 @@ export const VerificationReview = ({
     description,
     image,
     status,
-    category,
-    artisanName,
+    craft,
     origin,
-    price,
     materials,
+    techniques,
     submittedAt,
     evidence = [],
     previousReviews = [],
-    rejectionReason: existingRejection,
+    rejectionReason,
+    correctionRemarks,
   } = submission || {}
 
   const handleApprove = () => {
     if (window.confirm('Are you sure you want to approve this product?')) {
-      onApprove(id)
+      onApprove(id, feedback)
+      setFeedback('')
     }
   }
 
   const handleReject = () => {
-    if (rejectionReason.trim()) {
-      onReject(id, rejectionReason)
+    if (feedback.trim()) {
+      onReject(id, feedback)
       setShowRejectModal(false)
-      setRejectionReason('')
+      setFeedback('')
     }
   }
 
-  const handleRequestChanges = () => {
+  const handleRequestCorrection = () => {
     if (feedback.trim()) {
-      onRequestChanges(id, feedback)
-      setShowChangesModal(false)
+      onRequestCorrection(id, feedback)
+      setShowCorrectionModal(false)
       setFeedback('')
     }
   }
 
   const detailItems = [
-    { label: 'Category', value: category, icon: '📂' },
-    { label: 'Artisan', value: artisanName, icon: '👤' },
+    { label: 'Craft', value: craft, icon: '🎨' },
     { label: 'Origin', value: origin, icon: '📍' },
-    { label: 'Price', value: price ? `$${price}` : null, icon: '💰' },
-    { label: 'Materials', value: materials, icon: '🧵' },
+    { label: 'Materials', value: materials?.join(', '), icon: '🧵' },
+    { label: 'Techniques', value: techniques?.join(', '), icon: '🔧' },
   ]
 
   const visibleDetails = detailItems.filter(item => item.value)
@@ -104,11 +103,11 @@ export const VerificationReview = ({
           </Button>
           <Button
             variant="warning"
-            onClick={() => setShowChangesModal(true)}
+            onClick={() => setShowCorrectionModal(true)}
             loading={loading}
             disabled={loading}
           >
-            ✏️ Request Changes
+            ✏️ Request Correction
           </Button>
           <Button
             variant="danger"
@@ -164,42 +163,19 @@ export const VerificationReview = ({
             </div>
           )}
 
-          {/* Previous Reviews */}
-          {previousReviews && previousReviews.length > 0 && (
-            <div className="verification-review-section">
-              <h3 className="verification-review-section-title">Review History</h3>
-              <div className="verification-review-history">
-                {previousReviews.map((review, index) => (
-                  <div key={index} className="verification-review-history-item">
-                    <div className="verification-review-history-header">
-                      <span className="verification-review-history-decision">
-                        {review.decision === 'approve' ? '✅ Approved' :
-                         review.decision === 'reject' ? '❌ Rejected' :
-                         '✏️ Changes Requested'}
-                      </span>
-                      <span className="verification-review-history-date">
-                        {formatDateTime(review.createdAt)}
-                      </span>
-                    </div>
-                    {review.feedback && (
-                      <p className="verification-review-history-feedback">
-                        {review.feedback}
-                      </p>
-                    )}
-                    <span className="verification-review-history-reviewer">
-                      Reviewed by {review.reviewerName || 'Unknown'}
-                    </span>
-                  </div>
-                ))}
-              </div>
+          {/* Rejection Reason */}
+          {status === 'REJECTED' && rejectionReason && (
+            <div className="verification-review-section verification-review-rejection">
+              <h3 className="verification-review-section-title text-error">Rejection Reason</h3>
+              <p className="verification-review-rejection-text">{rejectionReason}</p>
             </div>
           )}
 
-          {/* Existing Rejection */}
-          {status === 'rejected' && existingRejection && (
-            <div className="verification-review-section verification-review-rejection">
-              <h3 className="verification-review-section-title text-error">Rejection Reason</h3>
-              <p className="verification-review-rejection-text">{existingRejection}</p>
+          {/* Correction Remarks */}
+          {status === 'CORRECTION_REQUIRED' && correctionRemarks && (
+            <div className="verification-review-section verification-review-correction">
+              <h3 className="verification-review-section-title text-warning">Correction Required</h3>
+              <p className="verification-review-correction-text">{correctionRemarks}</p>
             </div>
           )}
         </div>
@@ -222,21 +198,6 @@ export const VerificationReview = ({
               <span className="verification-review-sidebar-value">{evidence?.length || 0}</span>
             </div>
           </div>
-
-          <div className="verification-review-sidebar-card">
-            <h4 className="verification-review-sidebar-title">Quick Actions</h4>
-            <div className="verification-review-sidebar-actions">
-              <Button variant="outline" fullWidth size="sm">
-                📋 View Passport
-              </Button>
-              <Button variant="outline" fullWidth size="sm">
-                📎 Download Evidence
-              </Button>
-              <Button variant="outline" fullWidth size="sm">
-                📧 Contact Artisan
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -246,48 +207,11 @@ export const VerificationReview = ({
           <div className="verification-review-modal">
             <h3 className="verification-review-modal-title">Reject Product</h3>
             <p className="verification-review-modal-description">
-              Please provide a reason for rejecting this product. This will be shared with the artisan.
+              Please provide a reason for rejecting this product.
             </p>
             <textarea
               className="verification-review-modal-textarea"
               placeholder="Enter rejection reason..."
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              rows={4}
-            />
-            <div className="verification-review-modal-actions">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setShowRejectModal(false)
-                  setRejectionReason('')
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="danger"
-                onClick={handleReject}
-                disabled={!rejectionReason.trim()}
-              >
-                Confirm Rejection
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Request Changes Modal */}
-      {showChangesModal && (
-        <div className="verification-review-modal-overlay">
-          <div className="verification-review-modal">
-            <h3 className="verification-review-modal-title">Request Changes</h3>
-            <p className="verification-review-modal-description">
-              Provide feedback on what changes are needed for this product.
-            </p>
-            <textarea
-              className="verification-review-modal-textarea"
-              placeholder="Enter feedback for changes..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               rows={4}
@@ -296,7 +220,44 @@ export const VerificationReview = ({
               <Button
                 variant="ghost"
                 onClick={() => {
-                  setShowChangesModal(false)
+                  setShowRejectModal(false)
+                  setFeedback('')
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleReject}
+                disabled={!feedback.trim()}
+              >
+                Confirm Rejection
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Correction Modal */}
+      {showCorrectionModal && (
+        <div className="verification-review-modal-overlay">
+          <div className="verification-review-modal">
+            <h3 className="verification-review-modal-title">Request Correction</h3>
+            <p className="verification-review-modal-description">
+              Provide feedback on what corrections are needed.
+            </p>
+            <textarea
+              className="verification-review-modal-textarea"
+              placeholder="Enter correction feedback..."
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              rows={4}
+            />
+            <div className="verification-review-modal-actions">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowCorrectionModal(false)
                   setFeedback('')
                 }}
               >
@@ -304,10 +265,10 @@ export const VerificationReview = ({
               </Button>
               <Button
                 variant="warning"
-                onClick={handleRequestChanges}
+                onClick={handleRequestCorrection}
                 disabled={!feedback.trim()}
               >
-                Request Changes
+                Request Correction
               </Button>
             </div>
           </div>

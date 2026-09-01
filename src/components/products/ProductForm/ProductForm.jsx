@@ -2,28 +2,14 @@ import React, { useState, useRef } from 'react'
 import { Input } from '../../common/Input/Input'
 import { Select } from '../../common/Select/Select'
 import { Button } from '../../common/Button/Button'
-import { FileUploader } from '../../evidence/EvidenceUploader/EvidenceUploader'
+import { CATEGORIES, CATEGORY_ICONS } from '../../../utils/constants'
 import './ProductForm.css'
 
-const CATEGORY_OPTIONS = [
-  { value: 'textile', label: 'Textile' },
-  { value: 'metal', label: 'Metal Craft' },
-  { value: 'painting', label: 'Painting' },
-  { value: 'pottery', label: 'Pottery' },
-  { value: 'woodwork', label: 'Woodwork' },
-  { value: 'jewelry', label: 'Jewelry' },
-  { value: 'leather', label: 'Leather Craft' },
-  { value: 'paper', label: 'Paper Craft' },
-  { value: 'glass', label: 'Glass Art' },
-  { value: 'other', label: 'Other' },
-]
-
-const STATUS_OPTIONS = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'verified', label: 'Verified' },
-  { value: 'rejected', label: 'Rejected' },
-]
+// Map categories to backend-friendly format
+const CATEGORY_OPTIONS = CATEGORIES.map(cat => ({
+  value: cat,
+  label: cat,
+}))
 
 export const ProductForm = ({
   initialData = {},
@@ -36,24 +22,18 @@ export const ProductForm = ({
 }) => {
   const [formData, setFormData] = useState({
     name: initialData.name || '',
-    category: initialData.category || '',
-    description: initialData.description || '',
-    artisanName: initialData.artisanName || '',
+    craft: initialData.craft || '',
     origin: initialData.origin || '',
+    materials: initialData.materials || [],
+    techniques: initialData.techniques || [],
+    description: initialData.description || '',
     price: initialData.price || '',
-    materials: initialData.materials || '',
-    dimensions: initialData.dimensions || '',
-    weight: initialData.weight || '',
-    status: initialData.status || 'draft',
-    tags: initialData.tags || [],
     ...initialData,
   })
 
   const [errors, setErrors] = useState({})
-  const [tagInput, setTagInput] = useState('')
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(initialData.image || null)
-  const fileInputRef = useRef(null)
+  const [materialInput, setMaterialInput] = useState('')
+  const [techniqueInput, setTechniqueInput] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -70,48 +50,46 @@ export const ProductForm = ({
     }
   }
 
-  const handleImageUpload = (files) => {
-    if (files.length > 0) {
-      const file = files[0]
-      setImageFile(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleImageRemove = () => {
-    setImageFile(null)
-    setImagePreview(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
-  const handleAddTag = () => {
-    const tag = tagInput.trim()
-    if (tag && !formData.tags.includes(tag) && formData.tags.length < 10) {
+  const handleAddMaterial = () => {
+    const material = materialInput.trim()
+    if (material && !formData.materials.includes(material)) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, tag]
+        materials: [...prev.materials, material]
       }))
-      setTagInput('')
+      setMaterialInput('')
     }
   }
 
-  const handleRemoveTag = (tagToRemove) => {
+  const handleRemoveMaterial = (materialToRemove) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      materials: prev.materials.filter(m => m !== materialToRemove)
     }))
   }
 
-  const handleTagKeyDown = (e) => {
+  const handleAddTechnique = () => {
+    const technique = techniqueInput.trim()
+    if (technique && !formData.techniques.includes(technique)) {
+      setFormData(prev => ({
+        ...prev,
+        techniques: [...prev.techniques, technique]
+      }))
+      setTechniqueInput('')
+    }
+  }
+
+  const handleRemoveTechnique = (techniqueToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      techniques: prev.techniques.filter(t => t !== techniqueToRemove)
+    }))
+  }
+
+  const handleKeyDown = (e, handler) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleAddTag()
+      handler()
     }
   }
 
@@ -122,12 +100,12 @@ export const ProductForm = ({
       newErrors.name = 'Product name is required'
     }
 
-    if (!formData.category) {
-      newErrors.category = 'Category is required'
+    if (!formData.craft) {
+      newErrors.craft = 'Craft type is required'
     }
 
-    if (!formData.description?.trim()) {
-      newErrors.description = 'Description is required'
+    if (!formData.origin?.trim()) {
+      newErrors.origin = 'Origin is required'
     }
 
     setErrors(newErrors)
@@ -138,12 +116,7 @@ export const ProductForm = ({
     e.preventDefault()
     if (!validate()) return
 
-    const submitData = {
-      ...formData,
-      image: imageFile || formData.image,
-    }
-
-    onSubmit(submitData)
+    onSubmit(formData)
   }
 
   return (
@@ -165,69 +138,120 @@ export const ProductForm = ({
             />
 
             <Select
-              label="Category"
-              name="category"
+              label="Craft Type"
+              name="craft"
               options={CATEGORY_OPTIONS}
-              value={formData.category}
-              onChange={(value) => handleSelectChange('category', value)}
-              error={errors.category}
+              value={formData.craft}
+              onChange={(value) => handleSelectChange('craft', value)}
+              error={errors.craft}
               required
             />
 
-            <div className="product-form-row">
-              <Input
-                label="Artisan Name"
-                name="artisanName"
-                placeholder="Enter artisan name"
-                value={formData.artisanName}
-                onChange={handleChange}
-              />
-              <Input
-                label="Origin"
-                name="origin"
-                placeholder="e.g., Odisha, India"
-                value={formData.origin}
-                onChange={handleChange}
-              />
-            </div>
+            <Input
+              label="Origin"
+              name="origin"
+              placeholder="e.g., Odisha, India"
+              value={formData.origin}
+              onChange={handleChange}
+              error={errors.origin}
+              required
+            />
 
-            <div className="product-form-row">
-              <Input
-                label="Price"
-                name="price"
-                type="number"
-                placeholder="Enter price (optional)"
-                value={formData.price}
-                onChange={handleChange}
-                step="0.01"
-              />
-              <Input
-                label="Weight"
-                name="weight"
-                placeholder="e.g., 2.5 kg"
-                value={formData.weight}
-                onChange={handleChange}
-              />
-            </div>
+            <Input
+              label="Price (optional)"
+              name="price"
+              type="number"
+              placeholder="Enter price"
+              value={formData.price}
+              onChange={handleChange}
+              step="0.01"
+            />
+          </div>
 
-            <div className="product-form-row">
-              <Input
-                label="Materials"
-                name="materials"
-                placeholder="e.g., Cotton, Silk"
-                value={formData.materials}
-                onChange={handleChange}
-              />
-              <Input
-                label="Dimensions"
-                name="dimensions"
-                placeholder="e.g., 36 x 44 inches"
-                value={formData.dimensions}
-                onChange={handleChange}
-              />
+          {/* Materials */}
+          <div className="product-form-section">
+            <h4 className="product-form-section-title">Materials</h4>
+            <div className="product-form-tags">
+              <div className="product-form-tags-input">
+                <Input
+                  placeholder="Add material (press Enter)"
+                  value={materialInput}
+                  onChange={(e) => setMaterialInput(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, handleAddMaterial)}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddMaterial}
+                  disabled={!materialInput.trim()}
+                >
+                  Add
+                </Button>
+              </div>
+              <div className="product-form-tags-list">
+                {formData.materials.map((material, index) => (
+                  <span key={index} className="product-form-tag">
+                    {material}
+                    <button
+                      type="button"
+                      className="product-form-tag-remove"
+                      onClick={() => handleRemoveMaterial(material)}
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
+                {formData.materials.length === 0 && (
+                  <span className="product-form-tags-empty">No materials added</span>
+                )}
+              </div>
             </div>
           </div>
 
+          {/* Techniques */}
+          <div className="product-form-section">
+            <h4 className="product-form-section-title">Techniques</h4>
+            <div className="product-form-tags">
+              <div className="product-form-tags-input">
+                <Input
+                  placeholder="Add technique (press Enter)"
+                  value={techniqueInput}
+                  onChange={(e) => setTechniqueInput(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, handleAddTechnique)}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddTechnique}
+                  disabled={!techniqueInput.trim()}
+                >
+                  Add
+                </Button>
+              </div>
+              <div className="product-form-tags-list">
+                {formData.techniques.map((technique, index) => (
+                  <span key={index} className="product-form-tag">
+                    {technique}
+                    <button
+                      type="button"
+                      className="product-form-tag-remove"
+                      onClick={() => handleRemoveTechnique(technique)}
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
+                {formData.techniques.length === 0 && (
+                  <span className="product-form-tags-empty">No techniques added</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="product-form-sidebar">
           {/* Description */}
           <div className="product-form-section">
             <h4 className="product-form-section-title">Description</h4>
@@ -240,101 +264,7 @@ export const ProductForm = ({
                 onChange={handleChange}
                 rows={6}
               />
-              {errors.description && (
-                <span className="product-form-error">{errors.description}</span>
-              )}
-              <span className="product-form-char-count">
-                {formData.description?.length || 0} characters
-              </span>
             </div>
-          </div>
-
-          {/* Tags */}
-          <div className="product-form-section">
-            <h4 className="product-form-section-title">Tags</h4>
-            <div className="product-form-tags">
-              <div className="product-form-tags-input">
-                <Input
-                  placeholder="Add tags (press Enter)"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleAddTag}
-                  disabled={!tagInput.trim() || formData.tags.length >= 10}
-                >
-                  Add
-                </Button>
-              </div>
-              <div className="product-form-tags-list">
-                {formData.tags.map((tag, index) => (
-                  <span key={index} className="product-form-tag">
-                    #{tag}
-                    <button
-                      type="button"
-                      className="product-form-tag-remove"
-                      onClick={() => handleRemoveTag(tag)}
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
-                {formData.tags.length === 0 && (
-                  <span className="product-form-tags-empty">No tags added yet</span>
-                )}
-              </div>
-              <span className="product-form-tags-hint">
-                {formData.tags.length}/10 tags
-              </span>
-            </div>
-          </div>
-
-          {/* Status (for edit mode) */}
-          {showStatus && (
-            <div className="product-form-section">
-              <h4 className="product-form-section-title">Status</h4>
-              <Select
-                label="Product Status"
-                name="status"
-                options={STATUS_OPTIONS}
-                value={formData.status}
-                onChange={(value) => handleSelectChange('status', value)}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="product-form-sidebar">
-          {/* Image Upload */}
-          <div className="product-form-section">
-            <h4 className="product-form-section-title">Product Image</h4>
-            <div className="product-form-image-upload">
-              <FileUploader
-                onUpload={handleImageUpload}
-                accept="image/*"
-                maxFiles={1}
-                label="Upload product image"
-              />
-              {imagePreview && (
-                <div className="product-form-image-preview">
-                  <img src={imagePreview} alt="Product preview" />
-                  <button
-                    type="button"
-                    className="product-form-image-remove"
-                    onClick={handleImageRemove}
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-            </div>
-            <span className="product-form-hint">
-              Recommended: Square image, minimum 500x500px
-            </span>
           </div>
 
           {/* Actions */}

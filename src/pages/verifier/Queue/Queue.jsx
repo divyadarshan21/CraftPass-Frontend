@@ -22,7 +22,7 @@ export const Queue = () => {
   const fetchQueue = async () => {
     try {
       setLoading(true)
-      const response = await verificationApi.getQueue()
+      const response = await verificationApi.getPending()
       setQueue(response.data || [])
       setError(null)
     } catch (err) {

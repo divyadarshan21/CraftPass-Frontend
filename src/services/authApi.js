@@ -1,40 +1,22 @@
-import api from "./api";
+import api from './api'
+import { API_ENDPOINTS } from '../config/config'
 
-/**
- * Register a new user.
- *
- * POST /api/auth/register
- */
-export const registerUser = async (userData) => {
-    const response = await api.post(
-        "/api/auth/register",
-        userData
-    );
-
-    return response.data;
-};
-
-/**
- * Login an existing user.
- *
- * POST /api/auth/login
- */
-export const loginUser = async (credentials) => {
-    const response = await api.post(
-        "/api/auth/login",
-        credentials
-    );
-
-    return response.data;
-};
-
-/**
- * Logout the current user.
- *
- * The backend does not define a logout endpoint.
- * JWT authentication is stateless, so logout is handled
- * on the frontend by removing the stored token.
- */
-export const logoutUser = () => {
-    localStorage.removeItem("craftpass_token");
-};
+export const authApi = {
+  login: (email, password) => 
+    api.post(API_ENDPOINTS.auth.login, { email, password }),
+  
+  register: (data) => 
+    api.post(API_ENDPOINTS.auth.register, data),
+  
+  logout: () => 
+    api.post(API_ENDPOINTS.auth.logout),
+  
+  getMe: () => 
+    api.get(API_ENDPOINTS.auth.me),
+  
+  updateProfile: (data) => 
+    api.put(API_ENDPOINTS.auth.updateProfile, data),
+  
+  changePassword: (data) => 
+    api.post(API_ENDPOINTS.auth.changePassword, data),
+}

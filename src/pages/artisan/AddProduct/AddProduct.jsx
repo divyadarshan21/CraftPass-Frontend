@@ -14,30 +14,17 @@ export const AddProduct = () => {
   const handleSubmit = async (formData) => {
     setLoading(true)
     try {
-      // Prepare data for API
       const data = {
         name: formData.name,
-        category: formData.category,
-        description: formData.description,
-        artisanName: formData.artisanName,
+        craft: formData.craft,
         origin: formData.origin,
+        materials: formData.materials || [],
+        techniques: formData.techniques || [],
+        description: formData.description || '',
         price: parseFloat(formData.price) || 0,
-        materials: formData.materials,
-        dimensions: formData.dimensions,
-        weight: formData.weight,
-        tags: formData.tags,
-        status: 'draft',
       }
 
-      // If there's an image file, upload it separately or include in form data
       const response = await productApi.create(data)
-      
-      // If there's an image, upload it
-      if (formData.image && typeof formData.image === 'object') {
-        // Handle image upload separately if needed
-        // For now, we'll assume the API handles it
-      }
-
       toast.success('Product created successfully!')
       navigate(`/artisan/products/${response.data.id}`)
     } catch (error) {

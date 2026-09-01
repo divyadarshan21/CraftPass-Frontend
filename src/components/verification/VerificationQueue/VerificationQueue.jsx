@@ -4,6 +4,7 @@ import { StatusBadge } from '../../common/StatusBadge/StatusBadge'
 import { Button } from '../../common/Button/Button'
 import { EmptyState } from '../../common/EmptyState/EmptyState'
 import { formatDate } from '../../../utils/formatters'
+import { PRODUCT_STATUS } from '../../../utils/constants'
 import './VerificationQueue.css'
 
 export const VerificationQueue = ({
@@ -23,7 +24,9 @@ export const VerificationQueue = ({
     let result = items
 
     if (filter !== 'all') {
-      result = result.filter(item => item.status?.toLowerCase() === filter.toLowerCase())
+      result = result.filter(item => 
+        item.status?.toLowerCase() === filter.toLowerCase()
+      )
     }
 
     if (searchTerm) {
@@ -44,22 +47,9 @@ export const VerificationQueue = ({
     currentPage * itemsPerPage
   )
 
-  const getPriorityClass = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'high': return 'priority-high'
-      case 'medium': return 'priority-medium'
-      case 'low': return 'priority-low'
-      default: return ''
-    }
-  }
-
-  const getPriorityLabel = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'high': return '🔴 High'
-      case 'medium': return '🟡 Medium'
-      case 'low': return '🟢 Low'
-      default: return '⚪ Normal'
-    }
+  const getStatusCount = (status) => {
+    if (status === 'all') return items.length
+    return items.filter(i => i.status === status).length
   }
 
   if (loading) {
@@ -92,19 +82,13 @@ export const VerificationQueue = ({
               className={`verification-queue-filter-btn ${filter === 'all' ? 'active' : ''}`}
               onClick={() => setFilter('all')}
             >
-              All ({items.length})
+              All ({getStatusCount('all')})
             </button>
             <button
-              className={`verification-queue-filter-btn ${filter === 'pending' ? 'active' : ''}`}
-              onClick={() => setFilter('pending')}
+              className={`verification-queue-filter-btn ${filter === 'PENDING_VERIFICATION' ? 'active' : ''}`}
+              onClick={() => setFilter('PENDING_VERIFICATION')}
             >
-              Pending ({items.filter(i => i.status === 'pending').length})
-            </button>
-            <button
-              className={`verification-queue-filter-btn ${filter === 'review' ? 'active' : ''}`}
-              onClick={() => setFilter('review')}
-            >
-              In Review ({items.filter(i => i.status === 'review').length})
+              Pending ({getStatusCount('PENDING_VERIFICATION')})
             </button>
           </div>
 
@@ -131,16 +115,10 @@ export const VerificationQueue = ({
         {paginatedItems.map((item) => (
           <div
             key={item.id}
-            className={`verification-queue-item ${getPriorityClass(item.priority)}`}
+            className="verification-queue-item"
             onClick={() => onSelect?.(item.id)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onSelect?.(item.id)
-              }
-            }}
           >
             <div className="verification-queue-item-header">
               <div className="verification-queue-item-info">
@@ -169,18 +147,18 @@ export const VerificationQueue = ({
 
               <div className="verification-queue-item-badges">
                 <StatusBadge status={item.status} size="sm" />
-                {item.priority && (
-                  <span className={`verification-queue-item-priority ${getPriorityClass(item.priority)}`}>
-                    {getPriorityLabel(item.priority)}
-                  </span>
-                )}
               </div>
             </div>
 
             <div className="verification-queue-item-body">
-              {item.category && (
+              {item.craft && (
                 <span className="verification-queue-item-category">
-                  📂 {item.category}
+                  🎨 {item.craft}
+                </span>
+              )}
+              {item.origin && (
+                <span className="verification-queue-item-origin">
+                  📍 {item.origin}
                 </span>
               )}
               {item.submittedAt && (
@@ -201,14 +179,6 @@ export const VerificationQueue = ({
                   Review
                 </Button>
               </Link>
-              {onSelect && (
-                <Button variant="outline" size="sm" onClick={(e) => {
-                  e.stopPropagation()
-                  onSelect(item.id)
-                }}>
-                  Quick View
-                </Button>
-              )}
             </div>
           </div>
         ))}

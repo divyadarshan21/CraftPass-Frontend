@@ -1,0 +1,12 @@
+.add-product-page {
+  padding: var(--spacing-4);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .add-product-page {
+    padding: var(--spacing-2);
+  }
+}

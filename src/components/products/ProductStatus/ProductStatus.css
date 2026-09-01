@@ -1,0 +1,212 @@
+.product-status {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  border-left: 4px solid var(--gray-300);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.product-status.success {
+  border-left-color: var(--success);
+}
+
+.product-status.warning {
+  border-left-color: var(--warning);
+}
+
+.product-status.error {
+  border-left-color: var(--error);
+}
+
+.product-status.muted {
+  border-left-color: var(--gray-400);
+}
+
+.product-status-header {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: flex-start;
+}
+
+.product-status-icon-wrapper {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-100);
+}
+
+.product-status.success .product-status-icon-wrapper {
+  background: var(--success-light);
+}
+
+.product-status.warning .product-status-icon-wrapper {
+  background: var(--warning-light);
+}
+
+.product-status.error .product-status-icon-wrapper {
+  background: var(--error-light);
+}
+
+.product-status.muted .product-status-icon-wrapper {
+  background: var(--gray-100);
+}
+
+.product-status-icon {
+  font-size: var(--font-size-xl);
+}
+
+.product-status-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-status-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  color: var(--text);
+}
+
+.product-status.success .product-status-title {
+  color: var(--success);
+}
+
+.product-status.warning .product-status-title {
+  color: var(--warning);
+}
+
+.product-status.error .product-status-title {
+  color: var(--error);
+}
+
+.product-status.muted .product-status-title {
+  color: var(--muted);
+}
+
+.product-status-message {
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  margin: var(--spacing-1) 0 0 0;
+}
+
+.product-status-date {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--muted);
+  margin-top: var(--spacing-1);
+}
+
+.product-status-rejection {
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-2);
+  background: var(--error-light);
+  border-radius: var(--radius-sm);
+}
+
+.product-status-rejection-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--error);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.product-status-rejection-text {
+  font-size: var(--font-size-sm);
+  color: var(--error);
+  margin-left: var(--spacing-1);
+}
+
+.product-status-feedback {
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-2);
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+}
+
+.product-status-feedback-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.product-status-feedback-text {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  margin-left: var(--spacing-1);
+}
+
+.product-status-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--gray-200);
+  flex-wrap: wrap;
+}
+
+/* Compact version */
+.product-status-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  background: var(--gray-100);
+  color: var(--muted);
+}
+
+.product-status-compact.success {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.product-status-compact.warning {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.product-status-compact.error {
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.product-status-compact.muted {
+  background: var(--gray-100);
+  color: var(--muted);
+}
+
+.product-status-compact-icon {
+  font-size: var(--font-size-base);
+}
+
+.product-status-compact-label {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .product-status-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .product-status-actions {
+    flex-direction: column;
+  }
+
+  .product-status-actions .btn {
+    width: 100%;
+  }
+}
